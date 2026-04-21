@@ -1,1 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>フロント シフト</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:#f5f5f3;padding:16px}
+.wrap{max-width:900px;margin:0 auto;background:#fff;border-radius:12px;padding:20px;border:1px solid #D3D1C7}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.ttl{font-size:18px;font-weight:600;color:#2C2C2A}
+.legend{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:6px;font-size:12px;color:#5F5E5A}
+.legpill{height:12px;width:28px;border-radius:3px}
+.day-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.dtab{padding:7px 18px;border-radius:7px;font-size:13px;cursor:pointer;font-weight:600;transition:all .15s;border:1.5px solid transparent}
+.panel{background:#fff;border:1px solid #D3D1C7;border-radius:10px;overflow:hidden}
+.axis-row{display:flex;border-bottom:1px solid #D3D1C7;background:#F1EFE8}
+.name-col{width:130px;min-width:130px;padding:8px 12px;font-size:11px;color:#888780;border-right:1px solid #D3D1C7}
+.axis-track{flex:1;position:relative;height:32px}
+.tick-label{position:absolute;font-size:10px;transform:translateX(-50%);top:9px;white-space:nowrap;pointer-events:none;color:#888780}
+.staff-row{display:flex;border-bottom:2px solid #B4B2A9}
+.staff-row:last-child{border-bottom:none}
+.name-cell{width:130px;min-width:130px;padding:8px 12px;border-right:1px solid #D3D1C7;display:flex;flex-direction:column;justify-content:center;gap:0}
+.name-cell.working{background:#E6F1FB}
+.name-cell.off{background:#FBEAF0}
+.n1{font-size:11px;font-weight:600;color:#2C2C2A}
+.n2{font-size:12px;font-weight:600;color:#2C2C2A}
+.name-cell.working .n1,.name-cell.working .n2{color:#0C447C}
+.name-cell.off .n1,.name-cell.off .n2{color:#993556}
+.nbadge{font-size:9px;padding:1px 5px;border-radius:3px;background:#D3D1C7;color:#444441;margin-top:2px;display:inline-block}
+.timeline{flex:1;position:relative;height:52px;background:#fff}
+.bar{position:absolute;top:10px;bottom:10px;border-radius:4px;cursor:pointer;z-index:2;display:flex;align-items:center;overflow:hidden;transition:filter .15s}
+.bar:hover{filter:brightness(.88)}
+.blabel{font-size:10px;font-weight:600;color:#fff;padding:0 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.off-cell{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.off-tag{font-size:11px;font-weight:600;color:#993556;background:#FBEAF0;padding:3px 10px;border-radius:10px}
+.section-divider{background:#F1EFE8;border-bottom:2px solid #888780;border-top:2px solid #888780;padding:4px 12px;font-size:10px;font-weight:600;color:#5F5E5A;letter-spacing:.06em}
+.count-row{display:flex;border-top:2px solid #888780;background:#F1EFE8}
+.count-name{width:130px;min-width:130px;padding:6px 12px;font-size:10px;font-weight:600;color:#5F5E5A;border-right:1px solid #D3D1C7;display:flex;align-items:center}
+.count-track{flex:1;position:relative;height:36px}
+.count-seg{position:absolute;top:6px;bottom:6px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600}
+.add-bar{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center}
+.add-bar select{font-size:12px;padding:5px 8px;border-radius:7px;border:1px solid #B4B2A9;background:#fff;color:#2C2C2A}
+.add-btn{padding:6px 16px;border-radius:7px;border:1px solid #378ADD;background:#E6F1FB;color:#0C447C;font-size:12px;font-weight:600;cursor:pointer}
+.add-btn:hover{background:#B5D4F4}
+.edit-section{margin-top:14px;border:1px solid #D3D1C7;border-radius:10px;overflow:hidden}
+.edit-head{padding:10px 14px;background:#F1EFE8;border-bottom:1px solid #D3D1C7;font-size:12px;font-weight:600;color:#5F5E5A}
+.edit-body{padding:12px 14px}
+.edit-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld label{font-size:11px;color:#5F5E5A}
+.fld select{font-size:12px;padding:5px 8px;border-radius:7px;border:1px solid #B4B2A9;background:#fff;color:#2C2C2A;min-width:90px}
+.dur{font-size:14px;font-weight:600;color:#2C2C2A;padding:5px 0}
+.hint-txt{font-size:11px;color:#888780;margin-top:8px}
+.remove-btn{padding:5px 10px;border-radius:7px;border:1px solid #F09595;background:#FCEBEB;color:#A32D2D;font-size:11px;cursor:pointer;margin-top:8px}
+.typebadge{font-size:12px;font-weight:600;color:#fff;padding:4px 10px;border-radius:4px;display:inline-block}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="topbar">
+  <div class="ttl">フロント シフト</div>
+  <div class="legend">
+    <div class="leg"><div class="legpill" style="background:#534AB7"></div>夜勤 22〜8時</div>
+    <div class="leg"><div class="legpill" style="background:#D4537E"></div>日勤 8〜11時前</div>
+    <div class="leg"><div class="legpill" style="background:#1D9E75"></div>昼番 11時以降</div>
+  </div>
+</div>
+
+<div class="day-tabs" id="tabs"></div>
+<div class="panel" id="mainPanel"></div>
+
+<div class="add-bar">
+  <span style="font-size:12px;color:#5F5E5A">バイト追加：</span>
+  <select id="partSelect">
+    <option value="yoshimoto">Yoshimoto Jack</option>
+    <option value="togari">Togari</option>
+  </select>
+  <button class="add-btn" onclick="addPart()">この曜日に追加</button>
+</div>
+
+<div class="edit-section">
+  <div class="edit-head" id="editHead">シフトバーをクリックして編集</div>
+  <div class="edit-body" id="editBody"><div class="hint-txt">各スタッフのバーをクリックすると時間を変更できます</div></div>
+</div>
+</div>
+
+<script>
+const DAYS=['月','火','水','木','金','土','日'];
+const DAY_COLORS=[
+  {bg:'#534AB7',light:'#EEEDFE'},
+  {bg:'#D85A30',light:'#FAECE7'},
+  {bg:'#0F6E56',light:'#E1F5EE'},
+  {bg:'#BA7517',light:'#FAEEDA'},
+  {bg:'#185FA5',light:'#E6F1FB'},
+  {bg:'#7F77DD',light:'#EEEDFE'},
+  {bg:'#A32D2D',light:'#FCEBEB'},
+];
+const STAFF_FULL=[
+  {id:'nishi',   l1:'NISHI',   l2:'Aria',   type:'full'},
+  {id:'mika',    l1:'MIKA',    l2:'Celine', type:'full'},
+  {id:'tsukada', l1:'TSUKADA', l2:'George', type:'full'},
+  {id:'syu',     l1:'SYU',     l2:'Olivia', type:'full'},
+  {id:'sakamoto',l1:'SAKAMOTO',l2:'Bruno',  type:'full'},
+];
+const STAFF_PART=[
+  {id:'yoshimoto',l1:'Yoshimoto',l2:'Jack',type:'part'},
+  {id:'togari',   l1:'Togari',   l2:'',    type:'part'},
+];
+const ALL_STAFF=[...STAFF_FULL,...STAFF_PART];
+
+let shifts={
+  nishi:    {月:null,火:['22:00','08:00'],水:['22:00','08:00'],木:['22:00','08:00'],金:['22:00','08:00'],土:['22:00','08:00'],日:null},
+  mika:     {月:['22:00','08:00'],火:null,水:null,木:['13:00','22:00'],金:['13:00','22:00'],土:['13:00','22:00'],日:['22:00','08:00']},
+  tsukada:  {月:['13:00','22:00'],火:['13:00','22:00'],水:['13:00','22:00'],木:null,金:null,土:['08:00','17:00'],日:['08:00','17:00']},
+  syu:      {月:['08:00','17:00'],火:['08:00','17:00'],水:['08:00','17:00'],木:['08:00','17:00'],金:['08:00','17:00'],土:null,日:null},
+  sakamoto: {月:null,火:null,水:['12:00','21:00'],木:['12:00','21:00'],金:['12:00','21:00'],土:['12:00','21:00'],日:['12:00','21:00']},
+  yoshimoto:{月:null,火:null,水:null,木:null,金:null,土:null,日:null},
+  togari:   {月:null,火:null,水:null,木:null,金:null,土:null,日:null},
+};
+let activePartIds={月:[],火:[],水:[],木:[],金:[],土:[],日:[]};
+
+const S=8,E=24,R=E-S;
+const RED_HOURS=[11,15];
+const ALL_HOURS=[];
+for(let h=S;h<=E;h++) ALL_HOURS.push(h);
+const COLOR_NIGHT='#534AB7',COLOR_DAY='#D4537E',COLOR_MID='#1D9E75';
+
+let curDay='月',editing=null;
+
+function toMin(t){const[h,m]=t.split(':').map(Number);return h*60+m}
+function pct(h){return((h-S)/R*100).toFixed(3)+'%'}
+function getShiftType(s){const sm=toMin(s);return sm>=toMin('22:00')?'night':sm<toMin('11:00')?'day':'mid'}
+function barColor(s){const t=getShiftType(s);return t==='night'?COLOR_NIGHT:t==='day'?COLOR_DAY:COLOR_MID}
+function barGeom(s,e){
+  const sm=toMin(s),em=toMin(e);
+  let sh=sm/60,eh=em/60;
+  if(sm>=toMin('22:00'))eh=em/60+24;
+  else if(em<sm)eh=em/60+24;
+  const sc=Math.max(sh,S),ec=Math.min(eh,E);
+  return{l:((sc-S)/R*100).toFixed(3)+'%',w:((ec-sc)/R*100).toFixed(3)+'%'};
+}
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML=DAYS.map((d,i)=>{
+    const c=DAY_COLORS[i],active=d===curDay;
+    const style=active?`background:${c.bg};color:#fff;border-color:${c.bg}`:`background:${c.light};color:${c.bg};border-color:${c.bg}88`;
+    return`<div class="dtab" style="${style}" onclick="setDay('${d}')">${d}</div>`;
+  }).join('');
+}
+
+function ticksHtml(){
+  return ALL_HOURS.map(h=>{
+    const isRed=RED_HOURS.includes(h);
+    return`<div style="position:absolute;top:0;bottom:0;left:${pct(h)};width:${isRed?'1.5px':'0.5px'};background:${isRed?'#F09595':'#D3D1C7'};z-index:1;pointer-events:none"></div>`;
+  }).join('');
+}
+
+function rowHtml(st){
+  const sh=shifts[st.id][curDay];
+  const isWorking=sh!==null;
+  const nc=isWorking?'working':'off';
+  let r=`<div class="staff-row"><div class="name-cell ${nc}"><span class="n1">${st.l1}</span>`;
+  if(st.l2)r+=`<span class="n2">${st.l2}</span>`;
+  if(st.type==='part')r+=`<span class="nbadge">バイト</span>`;
+  r+=`</div><div class="timeline">${ticksHtml()}`;
+  if(isWorking){
+    const[s,e]=sh,g=barGeom(s,e),bc=barColor(s);
+    r+=`<div class="bar" style="left:${g.l};width:${g.w};background:${bc}" onclick="startEdit('${st.id}')"><span class="blabel">${s}〜${e}</span></div>`;
+  }else{
+    r+=`<div class="off-cell"><div class="off-tag">休み</div></div>`;
+  }
+  return r+`</div></div>`;
+}
+
+function renderPanel(){
+  const parts=activePartIds[curDay].map(p=>STAFF_PART.find(s=>s.id===p)).filter(Boolean);
+  let html=`<div class="axis-row"><div class="name-col"></div><div class="axis-track">`;
+  ALL_HOURS.forEach(h=>{
+    const isRed=RED_HOURS.includes(h);
+    html+=`<span class="tick-label" style="left:${pct(h)};color:${isRed?'#E24B4A':'#888780'};font-weight:${isRed?'600':'400'}">${h===24?'0':h}</span>`;
+  });
+  html+=`</div></div>`;
+  STAFF_FULL.forEach(st=>{html+=rowHtml(st);});
+  if(parts.length>0){
+    html+=`<div class="section-divider">バイト</div>`;
+    parts.forEach(st=>{html+=rowHtml(st);});
+  }
+  const allActive=[...STAFF_FULL,...parts];
+  html+=`<div class="count-row"><div class="count-name">在勤人数</div><div class="count-track">`;
+  for(let h=S;h<E;h++){
+    let cnt=0;
+    allActive.forEach(st=>{
+      const sh=shifts[st.id][curDay];
+      if(!sh)return;
+      const[s,e]=sh,sm=toMin(s),em=toMin(e),hm=h*60;
+      if(sm>=toMin('22:00')?hm>=sm||hm<em:hm>=sm&&hm<em)cnt++;
+    });
+    if(cnt>0){
+      const left=((h-S)/R*100).toFixed(3)+'%',width=(1/R*100).toFixed(3)+'%';
+      const bg=cnt>=3?'#E24B4A':cnt===2?'#EF9F27':'#378ADD';
+      const tc=cnt>=3?'#fff':cnt===2?'#412402':'#042C53';
+      html+=`<div class="count-seg" style="left:${left};width:${width};background:${bg};color:${tc}">${cnt}</div>`;
+    }
+  }
+  html+=`</div></div>`;
+  document.getElementById('mainPanel').innerHTML=html;
+  updateAddBar();
+}
+
+function updateAddBar(){
+  const sel=document.getElementById('partSelect'),active=activePartIds[curDay];
+  Array.from(sel.options).forEach(opt=>{
+    const st=STAFF_PART.find(s=>s.id===opt.value);
+    opt.disabled=active.includes(opt.value);
+    opt.text=opt.disabled?`${st.l1} ${st.l2} (追加済み)`:`${st.l1} ${st.l2}`;
+  });
+  const btn=document.querySelector('.add-btn'),all=active.length>=STAFF_PART.length;
+  btn.disabled=all;btn.style.opacity=all?'0.4':'1';
+}
+
+function addPart(){
+  const sid=document.getElementById('partSelect').value;
+  if(!activePartIds[curDay].includes(sid)){
+    activePartIds[curDay].push(sid);
+    if(!shifts[sid][curDay])shifts[sid][curDay]=['10:00','17:00'];
+  }
+  renderPanel();
+}
+
+function removePart(sid){
+  activePartIds[curDay]=activePartIds[curDay].filter(x=>x!==sid);
+  shifts[sid][curDay]=null;editing=null;
+  document.getElementById('editHead').textContent='シフトバーをクリックして編集';
+  document.getElementById('editBody').innerHTML='<div class="hint-txt">各スタッフのバーをクリックすると時間を変更できます</div>';
+  renderPanel();
+}
+
+const TIMES=[];
+for(let h=0;h<24;h++) for(const m of[0,30]) TIMES.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+
+function startEdit(sid){
+  editing=sid;
+  const st=ALL_STAFF.find(s=>s.id===sid),sh=shifts[sid][curDay];
+  document.getElementById('editHead').textContent=`${st.l1} ${st.l2||''} — ${curDay}曜日`;
+  let html=`<div class="edit-row"><div class="fld"><label>ステータス</label><select onchange="chStatus(this.value)">`;
+  html+=`<option value="work"${sh?' selected':''}>勤務</option><option value="off"${!sh?' selected':''}>休み</option></select></div>`;
+  if(sh){
+    const[s,e]=sh,sm=toMin(s),em=toMin(e),diff=em>sm?em-sm:24*60-sm+em;
+    const type=getShiftType(s),label=type==='night'?'夜勤':type==='day'?'日勤':'昼番',color=barColor(s);
+    html+=`<div class="fld"><label>種別</label><div class="typebadge" style="background:${color}">${label}</div></div>`;
+    html+=`<div class="fld"><label>開始</label><select onchange="chStart(this.value)">`;
+    TIMES.forEach(t=>{html+=`<option${t===s?' selected':''}>${t}</option>`;});
+    html+=`</select></div><div class="fld"><label>終了</label><select onchange="chEnd(this.value)">`;
+    TIMES.forEach(t=>{html+=`<option${t===e?' selected':''}>${t}</option>`;});
+    html+=`</select></div><div class="fld"><label>合計</label><div class="dur">${(diff/60).toFixed(1)}h</div></div>`;
+  }
+  html+=`</div>`;
+  if(st.type==='part')html+=`<button class="remove-btn" onclick="removePart('${sid}')">この曜日から削除</button>`;
+  html+=`<div class="hint-txt">変更は即時反映されます</div>`;
+  document.getElementById('editBody').innerHTML=html;
+}
+
+function chStatus(v){if(!editing)return;shifts[editing][curDay]=v==='work'?['09:00','17:00']:null;renderPanel();startEdit(editing)}
+function chStart(v){if(!editing||!shifts[editing][curDay])return;shifts[editing][curDay][0]=v;renderPanel();startEdit(editing)}
+function chEnd(v){if(!editing||!shifts[editing][curDay])return;shifts[editing][curDay][1]=v;renderPanel();startEdit(editing)}
+function setDay(d){
+  curDay=d;editing=null;
+  document.getElementById('editHead').textContent='シフトバーをクリックして編集';
+  document.getElementById('editBody').innerHTML='<div class="hint-txt">各スタッフのバーをクリックすると時間を変更できます</div>';
+  renderTabs();renderPanel();
+}
+
+renderTabs();renderPanel();
+</script>
+</body>
+</html>
 
