@@ -13,6 +13,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku
 .legend{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .leg{display:flex;align-items:center;gap:6px;font-size:12px;color:#5F5E5A}
 .legpill{height:12px;width:28px;border-radius:3px}
+.save-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.save-status{font-size:11px;color:#5F5E5A;padding:4px 10px;background:#F1EFE8;border-radius:6px;border:1px solid #D3D1C7}
+.save-status.saved{color:#0F6E56;background:#E1F5EE;border-color:#1D9E7555}
+.reset-btn{font-size:11px;padding:4px 12px;border-radius:6px;border:1px solid #F09595;background:#FCEBEB;color:#A32D2D;cursor:pointer}
+.reset-btn:hover{background:#F7C1C1}
 .day-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
 .dtab{padding:7px 18px;border-radius:7px;font-size:13px;cursor:pointer;font-weight:600;transition:all .15s;border:1.5px solid transparent}
 .panel{background:#fff;border:1px solid #D3D1C7;border-radius:10px;overflow:hidden}
@@ -69,6 +74,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku
   </div>
 </div>
 
+<div class="save-bar">
+  <div class="save-status" id="saveStatus">読み込み中...</div>
+  <button class="reset-btn" onclick="resetData()">初期データに戻す</button>
+</div>
+
 <div class="day-tabs" id="tabs"></div>
 <div class="panel" id="mainPanel"></div>
 
@@ -88,6 +98,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku
 </div>
 
 <script>
+const STORAGE_KEY = 'noir_shift_data_v1';
+
 const DAYS=['月','火','水','木','金','土','日'];
 const DAY_COLORS=[
   {bg:'#534AB7',light:'#EEEDFE'},
@@ -111,7 +123,7 @@ const STAFF_PART=[
 ];
 const ALL_STAFF=[...STAFF_FULL,...STAFF_PART];
 
-let shifts={
+const DEFAULT_SHIFTS={
   nishi:    {月:null,火:['22:00','08:00'],水:['22:00','08:00'],木:['22:00','08:00'],金:['22:00','08:00'],土:['22:00','08:00'],日:null},
   mika:     {月:['22:00','08:00'],火:null,水:null,木:['13:00','22:00'],金:['13:00','22:00'],土:['13:00','22:00'],日:['22:00','08:00']},
   tsukada:  {月:['13:00','22:00'],火:['13:00','22:00'],水:['13:00','22:00'],木:null,金:null,土:['08:00','17:00'],日:['08:00','17:00']},
@@ -120,14 +132,61 @@ let shifts={
   yoshimoto:{月:null,火:null,水:null,木:null,金:null,土:null,日:null},
   togari:   {月:null,火:null,水:null,木:null,金:null,土:null,日:null},
 };
-let activePartIds={月:[],火:[],水:[],木:[],金:[],土:[],日:[]};
+const DEFAULT_PARTS={月:[],火:[],水:[],木:[],金:[],土:[],日:[]};
 
+let shifts, activePartIds;
+
+// --- Storage ---
+function saveData(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({shifts, activePartIds}));
+    showStatus('自動保存しました ✓', true);
+  }catch(e){showStatus('保存できませんでした', false)}
+}
+function loadData(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const d=JSON.parse(raw);
+      shifts=d.shifts;
+      activePartIds=d.activePartIds;
+      showStatus('保存データを読み込みました ✓', true);
+    }else{
+      shifts=JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
+      activePartIds=JSON.parse(JSON.stringify(DEFAULT_PARTS));
+      showStatus('初期データで開始', false);
+    }
+  }catch(e){
+    shifts=JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
+    activePartIds=JSON.parse(JSON.stringify(DEFAULT_PARTS));
+    showStatus('初期データで開始', false);
+  }
+}
+function resetData(){
+  if(!confirm('初期データに戻しますか？変更内容は失われます。'))return;
+  shifts=JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
+  activePartIds=JSON.parse(JSON.stringify(DEFAULT_PARTS));
+  saveData();
+  renderTabs();renderPanel();
+}
+let statusTimer;
+function showStatus(msg, ok){
+  const el=document.getElementById('saveStatus');
+  el.textContent=msg;
+  el.className='save-status'+(ok?' saved':'');
+  clearTimeout(statusTimer);
+  statusTimer=setTimeout(()=>{
+    el.textContent='変更は自動保存されます';
+    el.className='save-status';
+  }, 2500);
+}
+
+// --- Constants ---
 const S=8,E=24,R=E-S;
 const RED_HOURS=[11,15];
 const ALL_HOURS=[];
 for(let h=S;h<=E;h++) ALL_HOURS.push(h);
 const COLOR_NIGHT='#534AB7',COLOR_DAY='#D4537E',COLOR_MID='#1D9E75';
-
 let curDay='月',editing=null;
 
 function toMin(t){const[h,m]=t.split(':').map(Number);return h*60+m}
@@ -159,9 +218,7 @@ function ticksHtml(){
 }
 
 function rowHtml(st){
-  const sh=shifts[st.id][curDay];
-  const isWorking=sh!==null;
-  const nc=isWorking?'working':'off';
+  const sh=shifts[st.id][curDay],isWorking=sh!==null,nc=isWorking?'working':'off';
   let r=`<div class="staff-row"><div class="name-cell ${nc}"><span class="n1">${st.l1}</span>`;
   if(st.l2)r+=`<span class="n2">${st.l2}</span>`;
   if(st.type==='part')r+=`<span class="nbadge">バイト</span>`;
@@ -193,8 +250,7 @@ function renderPanel(){
   for(let h=S;h<E;h++){
     let cnt=0;
     allActive.forEach(st=>{
-      const sh=shifts[st.id][curDay];
-      if(!sh)return;
+      const sh=shifts[st.id][curDay];if(!sh)return;
       const[s,e]=sh,sm=toMin(s),em=toMin(e),hm=h*60;
       if(sm>=toMin('22:00')?hm>=sm||hm<em:hm>=sm&&hm<em)cnt++;
     });
@@ -227,7 +283,7 @@ function addPart(){
     activePartIds[curDay].push(sid);
     if(!shifts[sid][curDay])shifts[sid][curDay]=['10:00','17:00'];
   }
-  renderPanel();
+  saveData();renderPanel();
 }
 
 function removePart(sid){
@@ -235,7 +291,7 @@ function removePart(sid){
   shifts[sid][curDay]=null;editing=null;
   document.getElementById('editHead').textContent='シフトバーをクリックして編集';
   document.getElementById('editBody').innerHTML='<div class="hint-txt">各スタッフのバーをクリックすると時間を変更できます</div>';
-  renderPanel();
+  saveData();renderPanel();
 }
 
 const TIMES=[];
@@ -259,13 +315,23 @@ function startEdit(sid){
   }
   html+=`</div>`;
   if(st.type==='part')html+=`<button class="remove-btn" onclick="removePart('${sid}')">この曜日から削除</button>`;
-  html+=`<div class="hint-txt">変更は即時反映されます</div>`;
+  html+=`<div class="hint-txt">変更は自動保存されます</div>`;
   document.getElementById('editBody').innerHTML=html;
 }
 
-function chStatus(v){if(!editing)return;shifts[editing][curDay]=v==='work'?['09:00','17:00']:null;renderPanel();startEdit(editing)}
-function chStart(v){if(!editing||!shifts[editing][curDay])return;shifts[editing][curDay][0]=v;renderPanel();startEdit(editing)}
-function chEnd(v){if(!editing||!shifts[editing][curDay])return;shifts[editing][curDay][1]=v;renderPanel();startEdit(editing)}
+function chStatus(v){
+  if(!editing)return;
+  shifts[editing][curDay]=v==='work'?['09:00','17:00']:null;
+  saveData();renderPanel();startEdit(editing);
+}
+function chStart(v){
+  if(!editing||!shifts[editing][curDay])return;
+  shifts[editing][curDay][0]=v;saveData();renderPanel();startEdit(editing);
+}
+function chEnd(v){
+  if(!editing||!shifts[editing][curDay])return;
+  shifts[editing][curDay][1]=v;saveData();renderPanel();startEdit(editing);
+}
 function setDay(d){
   curDay=d;editing=null;
   document.getElementById('editHead').textContent='シフトバーをクリックして編集';
@@ -273,8 +339,10 @@ function setDay(d){
   renderTabs();renderPanel();
 }
 
-renderTabs();renderPanel();
+// Init
+loadData();
+renderTabs();
+renderPanel();
 </script>
 </body>
 </html>
-
