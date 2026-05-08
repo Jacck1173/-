@@ -3,25 +3,155 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>フロント シフト</title>
+<title>HOTEL NOIR — フロント シフト</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Sans+JP:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:#f5f5f3;padding:16px}
-.wrap{max-width:900px;margin:0 auto;background:#fff;border-radius:12px;padding:20px;border:1px solid #D3D1C7}
-.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-.ttl{font-size:18px;font-weight:600;color:#2C2C2A}
-.legend{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.leg{display:flex;align-items:center;gap:6px;font-size:12px;color:#5F5E5A}
-.legpill{height:12px;width:28px;border-radius:3px}
-.save-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-.save-status{font-size:11px;color:#5F5E5A;padding:4px 10px;background:#F1EFE8;border-radius:6px;border:1px solid #D3D1C7}
-.save-status.saved{color:#0F6E56;background:#E1F5EE;border-color:#1D9E7555}
-.reset-btn{font-size:11px;padding:4px 12px;border-radius:6px;border:1px solid #F09595;background:#FCEBEB;color:#A32D2D;cursor:pointer}
-.reset-btn:hover{background:#F7C1C1}
-.day-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-.dtab{padding:7px 18px;border-radius:7px;font-size:13px;cursor:pointer;font-weight:600;transition:all .15s;border:1.5px solid transparent}
-.panel{background:#fff;border:1px solid #D3D1C7;border-radius:10px;overflow:hidden}
-.axis-row{display:flex;border-bottom:1px solid #D3D1C7;background:#F1EFE8}
+
+/* ===== SPLASH SCREEN ===== */
+#splash{
+  position:fixed;inset:0;z-index:9999;
+  background:#0E0E0C;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+#splash.hide{
+  animation:splashFadeOut 1.4s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes splashFadeOut{
+  0%{opacity:1;transform:scale(1)}
+  40%{opacity:1;transform:scale(1.018)}
+  100%{opacity:0;transform:scale(1.04)}
+}
+
+/* horizontal wipe lines top & bottom */
+.splash-line-top{
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(to right,transparent,#B8A98A 30%,#B8A98A 70%,transparent);
+  transform:scaleX(0);transform-origin:center;
+  animation:lineWipe 1s cubic-bezier(.4,0,.2,1) forwards;
+  animation-delay:.2s;
+}
+.splash-line-bottom{
+  position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(to right,transparent,#B8A98A 30%,#B8A98A 70%,transparent);
+  transform:scaleX(0);transform-origin:center;
+  animation:lineWipe 1s cubic-bezier(.4,0,.2,1) forwards;
+  animation-delay:.2s;
+}
+@keyframes lineWipe{to{transform:scaleX(1)}}
+
+/* logo */
+.splash-logo{
+  width:clamp(220px,45vw,380px);
+  opacity:0;
+  animation:logoReveal 1.2s cubic-bezier(.2,0,.2,1) forwards;
+  animation-delay:.6s;
+  filter:drop-shadow(0 0 30px rgba(184,169,138,.15));
+}
+@keyframes logoReveal{
+  0%{opacity:0;transform:scale(.94) translateY(16px)}
+  60%{opacity:1;transform:scale(1.01) translateY(-2px)}
+  100%{opacity:1;transform:scale(1) translateY(0)}
+}
+
+/* shimmer sweep over logo */
+.splash-shimmer{
+  position:absolute;
+  width:60px;height:100%;
+  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.07) 50%,transparent 60%);
+  left:-80px;
+  animation:shimmerSweep 1.6s ease forwards;
+  animation-delay:1.4s;
+  pointer-events:none;
+}
+@keyframes shimmerSweep{
+  to{left:110%}
+}
+
+.splash-tagline{
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:10px;font-weight:300;letter-spacing:.5em;
+  color:#4A4844;text-transform:uppercase;
+  opacity:0;margin-top:28px;
+  animation:fadeUp .8s ease forwards;
+  animation-delay:1.2s;
+}
+
+/* grain overlay */
+#splash::after{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+  background-size:180px;pointer-events:none;opacity:.5;z-index:0;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ===== APP ===== */
+body{font-family:'Noto Sans JP',-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:#F5F4F0;min-height:100vh;padding:16px;opacity:0;transition:opacity .6s ease .2s}
+body.visible{opacity:1}
+.app{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+
+/* Header */
+.header{background:#2C2C2A;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.header-title{font-size:18px;font-weight:700;color:#F1EFE8;letter-spacing:.02em}
+.header-legend{display:flex;gap:10px;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:#B4B2A9}
+.legpill{height:10px;width:24px;border-radius:2px}
+.save-pill{font-size:11px;padding:3px 10px;border-radius:20px;background:#3A3A38;color:#B4B2A9;transition:all .3s}
+.save-pill.ok{background:#0F3D2E;color:#6DCFAB}
+
+/* Mode tabs */
+.mode-tabs{display:flex;gap:0;background:#fff;border-radius:10px;border:1px solid #D3D1C7;overflow:hidden}
+.mode-tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;color:#888780;transition:all .15s;border:none;background:transparent}
+.mode-tab.active{background:#2C2C2A;color:#F1EFE8}
+
+/* Calendar */
+.cal-wrap{background:#fff;border-radius:12px;border:1px solid #D3D1C7;overflow:hidden}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #D3D1C7;background:#F1EFE8}
+.cal-nav{background:none;border:1px solid #D3D1C7;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:13px;color:#2C2C2A;font-weight:500}
+.cal-nav:hover{background:#E8E6DE}
+.cal-month{font-size:15px;font-weight:700;color:#2C2C2A}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-dow{text-align:center;padding:8px 4px;font-size:11px;font-weight:600;color:#888780;border-bottom:1px solid #D3D1C7}
+.cal-dow.sat{color:#185FA5}
+.cal-dow.sun{color:#A32D2D}
+.cal-day{border:0.5px solid #E8E6DE;min-height:52px;padding:4px;cursor:pointer;position:relative;transition:background .12s}
+.cal-day:hover{background:#F8F7F3}
+.cal-day.other-month{background:#FAFAF8}
+.cal-day.other-month .day-num{color:#C8C6BE}
+.cal-day.today{background:#FFFBF0}
+.cal-day.today .day-num{font-weight:700;color:#BA7517}
+.cal-day.selected{background:#E6F1FB;border-color:#378ADD}
+.cal-day.has-special{background:#F0FBF6}
+.cal-day.selected.has-special{background:#D6F0FF}
+.day-num{font-size:12px;font-weight:500;color:#2C2C2A;line-height:1}
+.day-num.sat{color:#185FA5}
+.day-num.sun{color:#A32D2D}
+.day-num.holiday{color:#A32D2D}
+.special-dot{width:6px;height:6px;border-radius:50%;background:#1D9E75;position:absolute;top:4px;right:4px}
+.shift-mini{margin-top:3px;display:flex;flex-direction:column;gap:1px}
+.shift-chip{font-size:8px;border-radius:2px;padding:1px 3px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+
+/* Shift panel */
+.shift-panel{background:#fff;border-radius:12px;border:1px solid #D3D1C7;overflow:hidden}
+.shift-panel-head{padding:12px 16px;background:#F1EFE8;border-bottom:1px solid #D3D1C7;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.shift-panel-title{font-size:14px;font-weight:700;color:#2C2C2A}
+.special-badge{font-size:11px;padding:3px 10px;border-radius:20px;background:#E1F5EE;color:#0F6E56;font-weight:600;border:1px solid #1D9E7544}
+.copy-from{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.copy-label{font-size:11px;color:#888780}
+.copy-btn{font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid #D3D1C7;background:#fff;cursor:pointer;color:#2C2C2A}
+.copy-btn:hover{background:#F1EFE8}
+.clear-special-btn{font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid #F09595;background:#FCEBEB;color:#A32D2D;cursor:pointer}
+
+/* Shift grid (reuse from before) */
+.panel{background:#fff;border:none;overflow:hidden}
+.axis-row{display:flex;border-bottom:1px solid #D3D1C7;background:#F8F7F3}
 .name-col{width:130px;min-width:130px;padding:8px 12px;font-size:11px;color:#888780;border-right:1px solid #D3D1C7}
 .axis-track{flex:1;position:relative;height:32px}
 .tick-label{position:absolute;font-size:10px;transform:translateX(-50%);top:9px;white-space:nowrap;pointer-events:none;color:#888780}
@@ -42,265 +172,98 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku
 .off-cell{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .off-tag{font-size:11px;font-weight:600;color:#993556;background:#FBEAF0;padding:3px 10px;border-radius:10px}
 .section-divider{background:#F1EFE8;border-bottom:2px solid #888780;border-top:2px solid #888780;padding:4px 12px;font-size:10px;font-weight:600;color:#5F5E5A;letter-spacing:.06em}
-.count-row{display:flex;border-top:2px solid #888780;background:#F1EFE8}
+.count-row{display:flex;border-top:2px solid #888780;background:#F8F7F3}
 .count-name{width:130px;min-width:130px;padding:6px 12px;font-size:10px;font-weight:600;color:#5F5E5A;border-right:1px solid #D3D1C7;display:flex;align-items:center}
 .count-track{flex:1;position:relative;height:36px}
-.count-seg{position:absolute;top:6px;bottom:6px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600}
-.add-bar{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center}
-.add-bar select{font-size:12px;padding:5px 8px;border-radius:7px;border:1px solid #B4B2A9;background:#fff;color:#2C2C2A}
-.add-btn{padding:6px 16px;border-radius:7px;border:1px solid #378ADD;background:#E6F1FB;color:#0C447C;font-size:12px;font-weight:600;cursor:pointer}
-.add-btn:hover{background:#B5D4F4}
-.edit-section{margin-top:14px;border:1px solid #D3D1C7;border-radius:10px;overflow:hidden}
-.edit-head{padding:10px 14px;background:#F1EFE8;border-bottom:1px solid #D3D1C7;font-size:12px;font-weight:600;color:#5F5E5A}
-.edit-body{padding:12px 14px}
-.edit-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
-.fld{display:flex;flex-direction:column;gap:4px}
-.fld label{font-size:11px;color:#5F5E5A}
-.fld select{font-size:12px;padding:5px 8px;border-radius:7px;border:1px solid #B4B2A9;background:#fff;color:#2C2C2A;min-width:90px}
-.dur{font-size:14px;font-weight:600;color:#2C2C2A;padding:5px 0}
-.hint-txt{font-size:11px;color:#888780;margin-top:8px}
-.remove-btn{padding:5px 10px;border-radius:7px;border:1px solid #F09595;background:#FCEBEB;color:#A32D2D;font-size:11px;cursor:pointer;margin-top:8px}
-.typebadge{font-size:12px;font-weight:600;color:#fff;padding:4px 10px;border-radius:4px;display:inline-block}
-</style>
-</head>
-<body>
-<div class="wrap">
-<div class="topbar">
-  <div class="ttl">フロント シフト</div>
-  <div class="legend">
-    <div class="leg"><div class="legpill" style="background:#534AB7"></div>夜勤 22〜8時</div>
-    <div class="leg"><div class="legpill" style="background:#D4537E"></div>日勤 8〜11時前</div>
-    <div class="leg"><div class="legpill" style="background:#1D9E75"></div>昼番 11時以降</div>
-  </div>
-</div>
-
-<div class="save-bar">
-  <div class="save-status" id="saveStatus">読み込み中...</div>
-  <button class="reset-btn" onclick="resetData()">初期データに戻す</button>
-</div>
-
-<div class="day-tabs" id="tabs"></div>
-<div class="panel" id="mainPanel"></div>
-
-<div class="add-bar">
-  <span style="font-size:12px;color:#5F5E5A">バイト追加：</span>
-  <select id="partSelect">
-    <option value="yoshimoto">Yoshimoto Jack</option>
-    <option value="togari">Togari</option>
-  </select>
-  <button class="add-btn" onclick="addPart()">この曜日に追加</button>
-</div>
-
-<div class="edit-section">
-  <div class="edit-head" id="editHead">シフトバーをクリックして編集</div>
-  <div class="edit-body" id="editBody"><div class="hint-txt">各スタッフのバーをクリックすると時間を変更できます</div></div>
-</div>
-</div>
-
-<script>
-const STORAGE_KEY = 'noir_shift_data_v1';
-
-const DAYS=['月','火','水','木','金','土','日'];
-const DAY_COLORS=[
-  {bg:'#534AB7',light:'#EEEDFE'},
-  {bg:'#D85A30',light:'#FAECE7'},
-  {bg:'#0F6E56',light:'#E1F5EE'},
-  {bg:'#BA7517',light:'#FAEEDA'},
-  {bg:'#185FA5',light:'#E6F1FB'},
-  {bg:'#7F77DD',light:'#EEEDFE'},
-  {bg:'#A32D2D',light:'#FCEBEB'},
-];
-const STAFF_FULL=[
-  {id:'nishi',   l1:'NISHI',   l2:'Aria',   type:'full'},
-  {id:'mika',    l1:'MIKA',    l2:'Celine', type:'full'},
-  {id:'tsukada', l1:'TSUKADA', l2:'George', type:'full'},
-  {id:'syu',     l1:'SYU',     l2:'Olivia', type:'full'},
-  {id:'sakamoto',l1:'SAKAMOTO',l2:'Bruno',  type:'full'},
-];
-const STAFF_PART=[
-  {id:'yoshimoto',l1:'Yoshimoto',l2:'Jack',type:'part'},
-  {id:'togari',   l1:'Togari',   l2:'',    type:'part'},
-];
-const ALL_STAFF=[...STAFF_FULL,...STAFF_PART];
-
-const DEFAULT_SHIFTS={
-  nishi:    {月:null,火:['22:00','08:00'],水:['22:00','08:00'],木:['22:00','08:00'],金:['22:00','08:00'],土:['22:00','08:00'],日:null},
-  mika:     {月:['22:00','08:00'],火:null,水:null,木:['13:00','22:00'],金:['13:00','22:00'],土:['13:00','22:00'],日:['22:00','08:00']},
-  tsukada:  {月:['13:00','22:00'],火:['13:00','22:00'],水:['13:00','22:00'],木:null,金:null,土:['08:00','17:00'],日:['08:00','17:00']},
-  syu:      {月:['08:00','17:00'],火:['08:00','17:00'],水:['08:00','17:00'],木:['08:00','17:00'],金:['08:00','17:00'],土:null,日:null},
-  sakamoto: {月:null,火:null,水:['12:00','21:00'],木:['12:00','21:00'],金:['12:00','21:00'],土:['12:00','21:00'],日:['12:00','21:00']},
-  yoshimoto:{月:null,火:null,水:null,木:null,金:null,土:null,日:null},
-  togari:   {月:null,火:null,水:null,木:null,金:null,土:null,日:null},
-};
-const DEFAULT_PARTS={月:[],火:[],水:[],木:[],金:[],土:[],日:[]};
-
-let shifts, activePartIds;
-
-// --- Storage ---
-function saveData(){
-  try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({shifts, activePartIds}));
-    showStatus('自動保存しました ✓', true);
-  }catch(e){showStatus('保存できませんでした', false)}
-}
-function loadData(){
-  try{
-    const raw=localStorage.getItem(STORAGE_KEY);
-    if(raw){
-      const d=JSON.parse(raw);
-      shifts=d.shifts;
-      activePartIds=d.activePartIds;
-      showStatus('保存データを読み込みました ✓', true);
-    }else{
-      shifts=JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
-      activePartIds=JSON.parse(JSON.stringify(DEFAULT_PARTS));
-      showStatus('初期データで開始', false);
-    }
-  }catch(e){
-    shifts=JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
-    activePartIds=JSON.parse(JSON.stringify(DEFAULT_PARTS));
-    showStatus('初期データで開始', false);
+< truncated lines 178-641 >
+    const base=getSpecialShifts(dk);
+    data.special[dk]={shifts:base.shifts, parts:base.parts};
   }
 }
-function resetData(){
-  if(!confirm('初期データに戻しますか？変更内容は失われます。'))return;
-  shifts=JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
-  activePartIds=JSON.parse(JSON.stringify(DEFAULT_PARTS));
-  saveData();
-  renderTabs();renderPanel();
-}
-let statusTimer;
-function showStatus(msg, ok){
-  const el=document.getElementById('saveStatus');
-  el.textContent=msg;
-  el.className='save-status'+(ok?' saved':'');
-  clearTimeout(statusTimer);
-  statusTimer=setTimeout(()=>{
-    el.textContent='変更は自動保存されます';
-    el.className='save-status';
-  }, 2500);
-}
 
-// --- Constants ---
-const S=8,E=24,R=E-S;
-const RED_HOURS=[11,15];
-const ALL_HOURS=[];
-for(let h=S;h<=E;h++) ALL_HOURS.push(h);
-const COLOR_NIGHT='#534AB7',COLOR_DAY='#D4537E',COLOR_MID='#1D9E75';
-let curDay='月',editing=null;
-
-function toMin(t){const[h,m]=t.split(':').map(Number);return h*60+m}
-function pct(h){return((h-S)/R*100).toFixed(3)+'%'}
-function getShiftType(s){const sm=toMin(s);return sm>=toMin('22:00')?'night':sm<toMin('11:00')?'day':'mid'}
-function barColor(s){const t=getShiftType(s);return t==='night'?COLOR_NIGHT:t==='day'?COLOR_DAY:COLOR_MID}
-function barGeom(s,e){
-  const sm=toMin(s),em=toMin(e);
-  let sh=sm/60,eh=em/60;
-  if(sm>=toMin('22:00'))eh=em/60+24;
-  else if(em<sm)eh=em/60+24;
-  const sc=Math.max(sh,S),ec=Math.min(eh,E);
-  return{l:((sc-S)/R*100).toFixed(3)+'%',w:((ec-sc)/R*100).toFixed(3)+'%'};
-}
-
-function renderTabs(){
-  document.getElementById('tabs').innerHTML=DAYS.map((d,i)=>{
-    const c=DAY_COLORS[i],active=d===curDay;
-    const style=active?`background:${c.bg};color:#fff;border-color:${c.bg}`:`background:${c.light};color:${c.bg};border-color:${c.bg}88`;
-    return`<div class="dtab" style="${style}" onclick="setDay('${d}')">${d}</div>`;
-  }).join('');
-}
-
-function ticksHtml(){
-  return ALL_HOURS.map(h=>{
-    const isRed=RED_HOURS.includes(h);
-    return`<div style="position:absolute;top:0;bottom:0;left:${pct(h)};width:${isRed?'1.5px':'0.5px'};background:${isRed?'#F09595':'#D3D1C7'};z-index:1;pointer-events:none"></div>`;
-  }).join('');
-}
-
-function rowHtml(st){
-  const sh=shifts[st.id][curDay],isWorking=sh!==null,nc=isWorking?'working':'off';
-  let r=`<div class="staff-row"><div class="name-cell ${nc}"><span class="n1">${st.l1}</span>`;
-  if(st.l2)r+=`<span class="n2">${st.l2}</span>`;
-  if(st.type==='part')r+=`<span class="nbadge">バイト</span>`;
-  r+=`</div><div class="timeline">${ticksHtml()}`;
-  if(isWorking){
-    const[s,e]=sh,g=barGeom(s,e),bc=barColor(s);
-    r+=`<div class="bar" style="left:${g.l};width:${g.w};background:${bc}" onclick="startEdit('${st.id}')"><span class="blabel">${s}〜${e}</span></div>`;
-  }else{
-    r+=`<div class="off-cell"><div class="off-tag">休み</div></div>`;
+function renderSpecialPanel(){
+  if(!selectedDate){
+    document.getElementById('specialShiftPanel').style.display='none';
+    return;
   }
-  return r+`</div></div>`;
-}
+  document.getElementById('specialShiftPanel').style.display='';
+  const d=new Date(selectedDate+'T00:00:00');
+  const dow=d.getDay();
+  const dayName=DAYS[dow===0?6:dow-1];
+  const holiday=JP_HOLIDAYS[selectedDate];
+  const isSpecial=!!data.special[selectedDate];
 
-function renderPanel(){
-  const parts=activePartIds[curDay].map(p=>STAFF_PART.find(s=>s.id===p)).filter(Boolean);
-  let html=`<div class="axis-row"><div class="name-col"></div><div class="axis-track">`;
-  ALL_HOURS.forEach(h=>{
-    const isRed=RED_HOURS.includes(h);
-    html+=`<span class="tick-label" style="left:${pct(h)};color:${isRed?'#E24B4A':'#888780'};font-weight:${isRed?'600':'400'}">${h===24?'0':h}</span>`;
+  // title
+  const [y,m,dd]=selectedDate.split('-');
+  document.getElementById('specialDateTitle').textContent=`${parseInt(y)}年${parseInt(m)}月${parseInt(dd)}日（${dayName}）${holiday?'　'+holiday:''}`;
+  document.getElementById('specialBadge').style.display=isSpecial?'':'none';
+  document.getElementById('clearSpecialBtn').style.display=isSpecial?'':'none';
+
+  // copy buttons
+  let copyHtml='';
+  DAYS.forEach(d=>{
+    copyHtml+=`<button class="copy-btn" onclick="copyFromDay('${d}')">${d}曜をコピー</button>`;
   });
-  html+=`</div></div>`;
-  STAFF_FULL.forEach(st=>{html+=rowHtml(st);});
-  if(parts.length>0){
-    html+=`<div class="section-divider">バイト</div>`;
-    parts.forEach(st=>{html+=rowHtml(st);});
-  }
-  const allActive=[...STAFF_FULL,...parts];
-  html+=`<div class="count-row"><div class="count-name">在勤人数</div><div class="count-track">`;
-  for(let h=S;h<E;h++){
-    let cnt=0;
-    allActive.forEach(st=>{
-      const sh=shifts[st.id][curDay];if(!sh)return;
-      const[s,e]=sh,sm=toMin(s),em=toMin(e),hm=h*60;
-      if(sm>=toMin('22:00')?hm>=sm||hm<em:hm>=sm&&hm<em)cnt++;
-    });
-    if(cnt>0){
-      const left=((h-S)/R*100).toFixed(3)+'%',width=(1/R*100).toFixed(3)+'%';
-      const bg=cnt>=3?'#E24B4A':cnt===2?'#EF9F27':'#378ADD';
-      const tc=cnt>=3?'#fff':cnt===2?'#412402':'#042C53';
-      html+=`<div class="count-seg" style="left:${left};width:${width};background:${bg};color:${tc}">${cnt}</div>`;
-    }
-  }
-  html+=`</div></div>`;
-  document.getElementById('mainPanel').innerHTML=html;
-  updateAddBar();
+  document.getElementById('copyFromBtns').innerHTML=copyHtml;
+
+  const src=getSpecialShifts(selectedDate);
+  document.getElementById('specialPanel').innerHTML=buildPanelHtml(src.shifts, src.parts, 'special');
+  updateAddBar('special');
 }
 
-function updateAddBar(){
-  const sel=document.getElementById('partSelect'),active=activePartIds[curDay];
-  Array.from(sel.options).forEach(opt=>{
-    const st=STAFF_PART.find(s=>s.id===opt.value);
-    opt.disabled=active.includes(opt.value);
-    opt.text=opt.disabled?`${st.l1} ${st.l2} (追加済み)`:`${st.l1} ${st.l2}`;
+function copyFromDay(dayName){
+  ensureSpecial(selectedDate);
+  const ws=data.weekly.shifts;
+  const wp=data.weekly.parts[dayName];
+  ALL_STAFF.forEach(st=>{
+    data.special[selectedDate].shifts[st.id]=ws[st.id][dayName]?[...ws[st.id][dayName]]:null;
   });
-  const btn=document.querySelector('.add-btn'),all=active.length>=STAFF_PART.length;
-  btn.disabled=all;btn.style.opacity=all?'0.4':'1';
+  data.special[selectedDate].parts=[...wp];
+  saveData(); renderSpecialPanel(); renderCalendar();
 }
 
-function addPart(){
-  const sid=document.getElementById('partSelect').value;
-  if(!activePartIds[curDay].includes(sid)){
-    activePartIds[curDay].push(sid);
-    if(!shifts[sid][curDay])shifts[sid][curDay]=['10:00','17:00'];
+function clearSpecial(){
+  if(!confirm('この日の特定シフトを削除しますか？通常シフト（曜日）に戻ります。'))return;
+  delete data.special[selectedDate];
+  saveData(); renderSpecialPanel(); renderCalendar(); resetEdit();
+}
+
+// ===================== ADD PART =====================
+function addPart(mode){
+  if(mode==='weekly'){
+    const sid=document.getElementById('partSelectWeekly').value;
+    if(!data.weekly.parts[curDay].includes(sid)){
+      data.weekly.parts[curDay].push(sid);
+      if(!data.weekly.shifts[sid][curDay]) data.weekly.shifts[sid][curDay]=['10:00','17:00'];
+    }
+    saveData(); renderWeeklyPanel();
+  } else {
+    if(!selectedDate)return;
+    ensureSpecial(selectedDate);
+    const sid=document.getElementById('partSelectSpecial').value;
+    if(!data.special[selectedDate].parts.includes(sid)){
+      data.special[selectedDate].parts.push(sid);
+      if(!data.special[selectedDate].shifts[sid]) data.special[selectedDate].shifts[sid]=['10:00','17:00'];
+    }
+    saveData(); renderSpecialPanel(); renderCalendar();
   }
-  saveData();renderPanel();
 }
 
-function removePart(sid){
-  activePartIds[curDay]=activePartIds[curDay].filter(x=>x!==sid);
-  shifts[sid][curDay]=null;editing=null;
-  document.getElementById('editHead').textContent='シフトバーをクリックして編集';
-  document.getElementById('editBody').innerHTML='<div class="hint-txt">各スタッフのバーをクリックすると時間を変更できます</div>';
-  saveData();renderPanel();
-}
-
+// ===================== EDIT =====================
 const TIMES=[];
 for(let h=0;h<24;h++) for(const m of[0,30]) TIMES.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
 
-function startEdit(sid){
-  editing=sid;
-  const st=ALL_STAFF.find(s=>s.id===sid),sh=shifts[sid][curDay];
-  document.getElementById('editHead').textContent=`${st.l1} ${st.l2||''} — ${curDay}曜日`;
+function startEdit(sid, context){
+  editing=sid; editingContext=context;
+  const st=ALL_STAFF.find(s=>s.id===sid);
+  let sh;
+  if(context==='weekly'){
+    sh=data.weekly.shifts[sid][curDay];
+  } else {
+    const src=getSpecialShifts(selectedDate);
+    sh=src.shifts[sid];
+  }
+  document.getElementById('editHead').textContent=`${st.l1} ${st.l2||''} — ${context==='weekly'?curDay+'曜日':selectedDate}`;
   let html=`<div class="edit-row"><div class="fld"><label>ステータス</label><select onchange="chStatus(this.value)">`;
   html+=`<option value="work"${sh?' selected':''}>勤務</option><option value="off"${!sh?' selected':''}>休み</option></select></div>`;
   if(sh){
@@ -314,35 +277,79 @@ function startEdit(sid){
     html+=`</select></div><div class="fld"><label>合計</label><div class="dur">${(diff/60).toFixed(1)}h</div></div>`;
   }
   html+=`</div>`;
-  if(st.type==='part')html+=`<button class="remove-btn" onclick="removePart('${sid}')">この曜日から削除</button>`;
+  if(st.type==='part') html+=`<button class="remove-btn" onclick="removePart('${sid}')">この日から削除</button>`;
   html+=`<div class="hint-txt">変更は自動保存されます</div>`;
   document.getElementById('editBody').innerHTML=html;
 }
 
-function chStatus(v){
-  if(!editing)return;
-  shifts[editing][curDay]=v==='work'?['09:00','17:00']:null;
-  saveData();renderPanel();startEdit(editing);
+function getEditShift(){
+  if(editingContext==='weekly') return data.weekly.shifts[editing][curDay];
+  ensureSpecial(selectedDate);
+  return data.special[selectedDate].shifts[editing];
 }
-function chStart(v){
-  if(!editing||!shifts[editing][curDay])return;
-  shifts[editing][curDay][0]=v;saveData();renderPanel();startEdit(editing);
-}
-function chEnd(v){
-  if(!editing||!shifts[editing][curDay])return;
-  shifts[editing][curDay][1]=v;saveData();renderPanel();startEdit(editing);
-}
-function setDay(d){
-  curDay=d;editing=null;
-  document.getElementById('editHead').textContent='シフトバーをクリックして編集';
-  document.getElementById('editBody').innerHTML='<div class="hint-txt">各スタッフのバーをクリックすると時間を変更できます</div>';
-  renderTabs();renderPanel();
+function setEditShift(val){
+  if(editingContext==='weekly'){
+    data.weekly.shifts[editing][curDay]=val;
+  } else {
+    ensureSpecial(selectedDate);
+    data.special[selectedDate].shifts[editing]=val;
+  }
 }
 
-// Init
+function chStatus(v){
+  if(!editing)return;
+  setEditShift(v==='work'?['09:00','17:00']:null);
+  saveData(); rerender(); startEdit(editing,editingContext);
+}
+function chStart(v){
+  if(!editing)return;
+  const sh=getEditShift(); if(!sh)return;
+  sh[0]=v; saveData(); rerender(); startEdit(editing,editingContext);
+}
+function chEnd(v){
+  if(!editing)return;
+  const sh=getEditShift(); if(!sh)return;
+  sh[1]=v; saveData(); rerender(); startEdit(editing,editingContext);
+}
+function removePart(sid){
+  if(editingContext==='weekly'){
+    data.weekly.parts[curDay]=data.weekly.parts[curDay].filter(x=>x!==sid);
+    data.weekly.shifts[sid][curDay]=null;
+  } else {
+    ensureSpecial(selectedDate);
+    data.special[selectedDate].parts=data.special[selectedDate].parts.filter(x=>x!==sid);
+    data.special[selectedDate].shifts[sid]=null;
+  }
+  saveData(); rerender(); resetEdit();
+}
+function rerender(){
+  if(editingContext==='weekly'){ renderWeeklyPanel(); }
+  else { renderSpecialPanel(); renderCalendar(); }
+}
+function resetEdit(){
+  editing=null; editingContext=null;
+  document.getElementById('editHead').textContent='シフトバーをクリックして編集';
+  document.getElementById('editBody').innerHTML='<div class="hint-txt">スタッフのバーをクリックすると時間を変更できます</div>';
+}
+
+// ===================== SPLASH =====================
+(function(){
+  const splash = document.getElementById('splash');
+  // Total: 0.6 logo in + 1.2 hold + 1.4 fade = ~4.2s total feel, trigger fade at 3.2s
+  setTimeout(()=>{
+    splash.classList.add('hide');
+    document.body.classList.add('visible');
+    setTimeout(()=>{ splash.style.display='none'; }, 1500);
+  }, 3200);
+})();
+
+// ===================== INIT =====================
 loadData();
-renderTabs();
-renderPanel();
+const now=new Date();
+calYear=now.getFullYear(); calMonth=now.getMonth()+1;
+document.getElementById('savePill').textContent='自動保存';
+renderDayTabs();
+renderWeeklyPanel();
 </script>
 </body>
 </html>
