@@ -319,7 +319,7 @@ const DEF_WEEKLY={
     mika:{月:['22:00','08:00'],火:null,水:null,木:['13:00','22:00'],金:['13:00','22:00'],土:['13:00','22:00'],日:['22:00','08:00']},
     tsukada:{月:['13:00','22:00'],火:['13:00','22:00'],水:['13:00','22:00'],木:null,金:null,土:['08:00','17:00'],日:['08:00','17:00']},
     syu:{月:['08:00','17:00'],火:['08:00','17:00'],水:['08:00','17:00'],木:['08:00','17:00'],金:['08:00','17:00'],土:null,日:null},
-    sakamoto:{月:null,火:null,水:['12:00','21:00'],木:['12:00','21:00'],金:['12:00','21:00'],土:['12:00','21:00'],日:['12:00','21:00']},
+    sakamoto:{月:['12:00','21:00'],火:['12:00','21:00'],水:null,木:null,金:['12:00','21:00'],土:['12:00','21:00'],日:['12:00','21:00']},
     yoshimoto:{月:null,火:null,水:null,木:null,金:null,土:null,日:null},
     togari:{月:null,火:null,水:null,木:null,金:null,土:null,日:null},
   },
@@ -445,7 +445,7 @@ function buildPanel(shiftsObj,partsArr,ctx){
       const[s,e]=sh,g=bgeom(s,e),bc=bcolor(s);
       r+=`<div class="bar" style="left:${g.l};width:${g.w};background:${bc}" onclick="startEdit('${st.id}','${ctx}')"><span class="blabel">${s}〜${e}</span></div>`;
     }else{
-      r+=`<div class="off-cell"><div class="off-tag">休み</div></div>`;
+      r+=`<div class="off-cell" style="cursor:pointer" onclick="startEdit('${st.id}','${ctx}')"><div class="off-tag" style="pointer-events:none">休み　＋</div></div>`;
     }
     return r+`</div></div>`;
   }
